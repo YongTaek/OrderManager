@@ -1,3 +1,4 @@
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -7,15 +8,15 @@ import java.util.ArrayList;
 
 
 public class ReadWrite {
-	public ArrayList<Menu> input(String string){
+	@SuppressWarnings("unchecked")
+	public ArrayList<Menu> input(File f){
 		FileInputStream fin = null;
 		ObjectInputStream ois = null;
 
 		try{
-			fin = new FileInputStream(string);
+			fin = new FileInputStream(f);
 			ois = new ObjectInputStream(fin);
-			
-			ArrayList<Menu> list = (ArrayList<Menu>)ois.readObject();
+			ArrayList <Menu>list = (ArrayList<Menu>)ois.readObject();
 			return list;
 		}catch(Exception ex){
 			return null;
@@ -29,17 +30,14 @@ public class ReadWrite {
 		} // finally
 	}
 	
-	public void output(ArrayList<Menu> b,String file){
+	public void output(ArrayList<Menu> b,File f){
 		FileOutputStream fout = null;
 		ObjectOutputStream oos = null;
 		
 		try{
-			fout = new FileOutputStream(file);
+			fout = new FileOutputStream(f);
 			oos = new ObjectOutputStream(fout);
-			Menu m = new Menu("히레까스",7000);
-			Menu m2 = new Menu("로스까스",7500);
-			b.add(m);
-			b.add(m2);
+				
 			oos.writeObject(b);
 			oos.reset();
 			oos.writeObject(b);

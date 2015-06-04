@@ -1,9 +1,12 @@
+import java.io.Serializable;
 import java.util.ArrayList;
 
-import javax.swing.JTextArea;
 
-
-class Menu {
+class Menu implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	String name;
 	int price;
 	
@@ -25,25 +28,13 @@ class Menu {
 	}
 }
 
-class MenuManager{
-	ArrayList<Menu> menu = new ArrayList<Menu>();
+class MenuManager {
+	static ArrayList<Menu> menu = new ArrayList<Menu>();
 	ReadWrite fio = new ReadWrite();
-	void Reader(){
-		ArrayList<Menu> menu2 = fio.input("data.dat");
-		if(menu2!=null){
-			for(Menu i: menu2){
-				menu.add(i);
-			}
-		}
-	}
-	
-	void Writer(){
-		fio.output(menu,"data.txt");
-	}
-	
+	String file = "data.dat";
 	boolean add(Menu menu){
 		try{
-			this.menu.add(menu);
+			MenuManager.menu.add(menu);
 			return true;
 		}catch(Exception ex){
 			return false;
@@ -60,7 +51,7 @@ class MenuManager{
 		return check;
 	}
 	
-	int indexMenu(String name){
+	static int indexMenu(String name){
 		int index = menu.size()+1;
 		for(int i=0;i<menu.size();i++){
 			if(menu.get(i).getName().equals(name)){
@@ -70,7 +61,7 @@ class MenuManager{
 		}
 		return index;
 	}
-	boolean modify(int index,String name, int price){
+	static boolean modify(int index,String name, int price){
 		try{
 			menu.get(index).setName(name);
 			menu.get(index).setPrice(price);
