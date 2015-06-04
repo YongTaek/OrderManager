@@ -2,12 +2,16 @@ import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.EventQueue;
+import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
 import java.io.File;
 import java.util.ArrayList;
+
+import javafx.scene.input.MouseEvent;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -20,8 +24,13 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
+import javax.swing.JTextArea;
+import javax.swing.ListSelectionModel;
 import javax.swing.UIManager;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 
 
 
@@ -53,11 +62,13 @@ public class OrderGui extends JFrame {
 	private JButton readOrderbtn;
 	private JTable lOrderArea;
 	private JButton writeOrderbtn;
+	private JPanel detail;
+	private JTextArea listDetail;
 	DefaultTableModel tableModel;
 	DefaultTableModel tableModel2;
 	ReadWrite fio = new ReadWrite();
 	String []info = {"메뉴","가격"};
-	String []info2 = {"주문번호","금액","자세히"};
+	String []info2 = {"주문번호","금액"};
 	String []orderInfo = {"메뉴","수량","금액"};
 
 	/**
@@ -91,7 +102,7 @@ public class OrderGui extends JFrame {
 	 */
 	public OrderGui() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 1000, 800);
+		setBounds(100, 100, 1100, 800);
 		contentPane = getContentPane();
 		fileBar();
 		JTabbedPane tab = new JTabbedPane();
@@ -110,7 +121,7 @@ public class OrderGui extends JFrame {
 		JMenuItem open = new JMenuItem("open");
 		JMenuItem save = new JMenuItem("save");
 		JMenuItem exit = new JMenuItem("exit");
-		open.addActionListener(new OpenActionListener());
+		open.addActionListener(new OpenMenuListener());
 		file.add(open);
 		file.add(save);
 		file.add(exit);
@@ -121,25 +132,38 @@ public class OrderGui extends JFrame {
 		lOrderArea = new JTable(tableModel2);
 		new JScrollPane(lOrderArea);
 		tableModel2.addRow(info2);
+		lOrderArea.setPreferredSize(new Dimension(450,800));
+		detail = new JPanel();
+		detail.setLayout(new FlowLayout());
+		listDetail = new JTextArea("");
+		listDetail.setPreferredSize(new Dimension(450,800));
+		listDetail.setFont(new Font("\\OrderManager\\lib\\08SEOULNAMSANM.TTF",Font.CENTER_BASELINE,20));
 		lOrderArea.setFont(new Font("\\OrderManager\\lib\\08SEOULNAMSANM.TTF",Font.CENTER_BASELINE,18));
 		lOrderArea.setRowHeight(30);
 		orderPan = new JPanel();
 		orderPan.setLayout(new BorderLayout());
 		oSelect = new JPanel();
-		oSelect.setPreferredSize(new Dimension(1000,100));
+		oSelect.setPreferredSize(new Dimension(900,100));
 		oSelect.setLayout(new GridLayout(1,6));
 		oAddbtn = new JButton("메뉴 추가");
 		oAddbtn.setFont(new Font("\\OrderManager\\lib\\08SEOULNAMSANM.TTF",Font.BOLD,18));
+		oAddbtn.addActionListener(new addOrderListener());
 		omodify= new JButton("메뉴 수정");
 		omodify.setFont(new Font("\\OrderManager\\lib\\08SEOULNAMSANM.TTF",Font.BOLD,18));
 		oRemove = new JButton("메뉴 제거");
 		oRemove.setFont(new Font("\\OrderManager\\lib\\08SEOULNAMSANM.TTF",Font.BOLD,18));
 		oListbtn = new JButton("메뉴 목록");
+		oListbtn.addActionListener(new listOrderListener());
 		oListbtn.setFont(new Font("\\OrderManager\\lib\\08SEOULNAMSANM.TTF",Font.BOLD,18));
 		readOrderbtn = new JButton("메뉴 가져오기");
 		readOrderbtn.setFont(new Font("\\OrderManager\\lib\\08SEOULNAMSANM.TTF",Font.BOLD,18));
 		writeOrderbtn = new JButton("메뉴 저장하기");
 		writeOrderbtn.setFont(new Font("\\OrderManager\\lib\\08SEOULNAMSANM.TTF",Font.BOLD,18));
+		ListSelectionModel listMod = lOrderArea.getSelectionModel();
+		listMod.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		listMod.addListSelectionListener(new selectTableListener());
+		detail.add(lOrderArea);
+		detail.add(listDetail);
 		oSelect.add(oAddbtn);
 		oSelect.add(omodify);
 		oSelect.add(oRemove);
@@ -148,6 +172,7 @@ public class OrderGui extends JFrame {
 		oSelect.add(writeOrderbtn);
 		orderPan.add(oSelect,BorderLayout.PAGE_START);
 		orderPan.add(lOrderArea,BorderLayout.CENTER);
+		orderPan.add(detail,BorderLayout.EAST);
 	}
 	public void menuManage(){
 		//JTable
@@ -167,19 +192,19 @@ public class OrderGui extends JFrame {
 		aMenubtn.addActionListener(new AddActionListener());
 		sMenubtn = new JButton("메뉴 수정");
 		sMenubtn.setFont(new Font("\\OrderManager\\lib\\08SEOULNAMSANM.TTF",Font.BOLD,18));
-		sMenubtn.addActionListener(new modifyActionListener());
+		sMenubtn.addActionListener(new modifyMenuListener());
 		rMenubtn = new JButton("메뉴 제거");
 		rMenubtn.setFont(new Font("\\OrderManager\\lib\\08SEOULNAMSANM.TTF",Font.BOLD,18));
-		rMenubtn.addActionListener(new removeActionListener());
+		rMenubtn.addActionListener(new removeMenuListener());
 		lMenubtn = new JButton("메뉴 목록");
 		lMenubtn.setFont(new Font("\\OrderManager\\lib\\08SEOULNAMSANM.TTF",Font.BOLD,18));
-		lMenubtn.addActionListener(new ListActionListener());
+		lMenubtn.addActionListener(new ListMenuListener());
 		readMenubtn = new JButton("메뉴 가져오기");
 		readMenubtn.setFont(new Font("\\OrderManager\\lib\\08SEOULNAMSANM.TTF",Font.BOLD,18));
-		readMenubtn.addActionListener(new OpenActionListener());	
+		readMenubtn.addActionListener(new OpenMenuListener());	
 		writeMenubtn = new JButton("메뉴 저장하기");
 		writeMenubtn.setFont(new Font("\\OrderManager\\lib\\08SEOULNAMSANM.TTF",Font.BOLD,18));
-		writeMenubtn.addActionListener(new SaveActionListener());
+		writeMenubtn.addActionListener(new SaveMenuListener());
 		mSelect.add(aMenubtn);
 		mSelect.add(sMenubtn);
 		mSelect.add(rMenubtn);
@@ -189,11 +214,14 @@ public class OrderGui extends JFrame {
 		menuPan.add(mSelect,BorderLayout.PAGE_START);
 		menuPan.add("Center", lMenuArea);
 	}
+	public void removetable(DefaultTableModel table){
+		while(table.getRowCount()!=0){
+			table.removeRow(0);
+		}
+	}
 	public void read(ArrayList<Menu> menu){
 		Object [] data = new Object[2];
-		while(tableModel.getRowCount()!=0){
-			tableModel.removeRow(0);
-		}
+		removetable(tableModel);
 		tableModel.addRow(info);
 		if(menu!=null){
 			for(Menu i : menu){
@@ -209,7 +237,7 @@ public class OrderGui extends JFrame {
 		data[1]=menu.getPrice();
 		tableModel.addRow(data);
 	}
-	public class SaveActionListener implements ActionListener{
+	public class SaveMenuListener implements ActionListener{
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
@@ -224,7 +252,7 @@ public class OrderGui extends JFrame {
 		}
 		
 	}
-	public class OpenActionListener implements ActionListener{
+	public class OpenMenuListener implements ActionListener{
 
 		public void actionPerformed(ActionEvent e){
 			File f;
@@ -252,7 +280,7 @@ public class OrderGui extends JFrame {
 		}
 		
 	}
-	public class ListActionListener implements ActionListener{
+	public class ListMenuListener implements ActionListener{
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
@@ -261,7 +289,7 @@ public class OrderGui extends JFrame {
 		}
 		
 	}
-	public class removeActionListener implements ActionListener{
+	public class removeMenuListener implements ActionListener{
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
@@ -281,7 +309,7 @@ public class OrderGui extends JFrame {
 		}
 		
 	}
-	public class modifyActionListener implements ActionListener{
+	public class modifyMenuListener implements ActionListener{
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
@@ -298,8 +326,59 @@ public class OrderGui extends JFrame {
 				JOptionPane.showMessageDialog(null, "잘못입력하셨습니다.");
 			}
 		}
+	}
+	public class addOrderListener implements ActionListener{
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			// TODO Auto-generated method stub
+			addOrder a = new addOrder(tableModel2);
+			a.setVisible(true);
+		}
+		
+	}
+	public class listOrderListener implements ActionListener{
+		
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			// TODO Auto-generated method stub
+			Object [] data = new Object[2];
+			removetable(tableModel2);
+			tableModel2.addRow(info2);
+			JButton[] button = new JButton[OrderManager.order.size()];
+			for(int i=0 ;i<OrderManager.order.size();i++){
+				button[i]= new JButton("자세히");
+				data[0]=OrderManager.order.get(i).getOrderNumber();
+				data[1]=OrderManager.order.get(i).totalPrice;
+				tableModel2.addRow(data);
+			}
+		}
+	}
+	public class selectTableListener implements ListSelectionListener{
+
+		@Override
+		public void valueChanged(ListSelectionEvent e) {
+			// TODO Auto-generated method stub
+			int selRows;
+			Object Value;
+			if(!e.getValueIsAdjusting()){
+				selRows = lOrderArea.getSelectedRow();
+				listDetail.setText("");
+				if(selRows>0){
+					TableModel tm = lOrderArea.getModel();
+					Value = tm.getValueAt(selRows, 0);
+					System.out.println("@"+Value);
+					int index = OrderManager.indexOfOrder((int) Value);
+					System.out.println(index);
+					System.out.println("!"+OrderManager.order.get(index).order.size());
+					listDetail.append("메뉴명\t수량\t금액\n");
+					for(sellMenu i : OrderManager.order.get(index).order){
+						listDetail.append(i.getName()+"\t"+i.getCount()+"\t"+i.getPrice()*i.getCount()+"\n");
+					}
+				}
+			}
+		}
 		
 	}
 }
-
 

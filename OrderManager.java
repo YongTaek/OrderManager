@@ -1,6 +1,5 @@
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 class sellMenu extends Menu{
 	/**
@@ -51,7 +50,17 @@ class Order implements Serializable{
 	}
 }
 public class OrderManager {
-	ArrayList<Order> order = new ArrayList<Order>();
-	
-	
+	static ArrayList<Order> order = new ArrayList<Order>();
+	static int orderCount =0;
+	ReadWrite fio = new ReadWrite();
+	static int indexOfOrder(int n){
+		int index=order.size()+1;
+		for(int i=0; i<order.size(); i++){
+			if(order.get(i).getOrderNumber()==n){
+				index = i;
+				break;
+			}
+		}
+		return index;
+	}
 }
