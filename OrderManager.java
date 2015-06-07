@@ -31,10 +31,12 @@ class Order implements Serializable{
 	private static final long serialVersionUID = 1L;
 	int orderNumber;
 	int totalPrice = 0;
+	String date;
 	ArrayList<sellMenu> order;
-	Order(int orderNumber,ArrayList<sellMenu> order){
+	Order(int orderNumber,ArrayList<sellMenu> order,String date){
 		this.orderNumber = orderNumber;
 		this.order = order;
+		this.date = date;
 		for(sellMenu i : order){
 			this.totalPrice+=i.getPrice() * i.getCount();
 		}
@@ -47,6 +49,9 @@ class Order implements Serializable{
 	}
 	ArrayList<sellMenu> getOrderList(){
 		return order;
+	}
+	String getOrderDate(){
+		return date;
 	}
 }
 public class OrderManager {

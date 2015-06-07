@@ -5,7 +5,9 @@ import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -45,7 +47,7 @@ class addOrder extends JFrame{
 		panel = new JPanel();
 		panel2 = new JPanel();
 		pan.setLayout(new BorderLayout());
-		panel.setLayout(new GridLayout(5,5));
+		panel.setLayout(new GridLayout(5,5,20,20));
 		panel.setPreferredSize(new Dimension(900,450));
 		panel2.setLayout(new FlowLayout());
 		orderconfirm = new JButton("추가");
@@ -53,7 +55,7 @@ class addOrder extends JFrame{
 		cancel = new JButton("취소");
 		cancel.addActionListener(new cancelActionListener());
 		menu = new JButton[MenuManager.menu.size()];
-		for(int i=0;i<25-MenuManager.menu.size();i++){
+		for(int i=0;i<23-MenuManager.menu.size();i++){
 			JButton b = new JButton();
 			panel.add(b);
 		}
@@ -62,10 +64,10 @@ class addOrder extends JFrame{
 			panel.add(menu[i],i);
 			menu[i].addActionListener(new btnActionListener());
 		}
-		panel2.add(orderconfirm);
-		panel2.add(cancel);
+		panel.add(orderconfirm);
+		panel.add(cancel);
 		pan.add(panel,BorderLayout.CENTER);
-		pan.add(panel2,BorderLayout.SOUTH);
+		//pan.add(panel2,BorderLayout.SOUTH);
 	}
 	public class btnActionListener implements ActionListener{
 
@@ -78,7 +80,6 @@ class addOrder extends JFrame{
 			int index = checkOrder(name);
 			if(index>order.size()){
 				order.add(new sellMenu(name,price,1));
-				System.out.println("$$"+order.size());
 			} else{
 				order.get(index).setCount(order.get(index).getCount()+1);
 			}
@@ -102,17 +103,17 @@ class addOrder extends JFrame{
 		public void actionPerformed(ActionEvent e) {
 			// TODO Auto-generated method stub
 			if(order.size()!=0){
-				System.out.println("a");
-				OrderManager.order.add(new Order(OrderManager.orderCount+1,order));
-				
-				System.out.println(OrderManager.order.get(0).order.size());
-				Object [] data = new Object[2];
+				SimpleDateFormat f = new SimpleDateFormat("yyyy년 MM월 dd일 E요일 a h시 mm분 ss초 ");
+				String date = f.format(new Date());
+				OrderManager.order.add(new Order(OrderManager.orderCount+1,order,date));
+
+				Object [] data = new Object[3];
 				int i = OrderManager.indexOfOrder(OrderManager.orderCount+1);
-				data[0]=OrderManager.order.get(i).getOrderNumber();
-				data[1]=OrderManager.order.get(i).totalPrice;
+				data[0]=OrderManager.order.get(i).getOrderDate();
+				data[1]=OrderManager.order.get(i).getOrderNumber();
+				data[2]=OrderManager.order.get(i).totalPrice;
 				tm.addRow(data);
 				OrderManager.orderCount++;
-				System.out.println(OrderManager.order.get(0).order.size());
 				setVisible(false);
 			} else{
 				JOptionPane.showMessageDialog(pan, "입력값이 없습니다.");

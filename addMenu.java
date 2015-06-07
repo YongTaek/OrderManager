@@ -92,12 +92,12 @@ class addMenu extends JFrame{
 			// TODO Auto-generated method stub
 			String name = amenutext.getText();
 			String price = apricetext.getText();
-			if(name == null || isDigit(price)){
+			if(name == null || price == null || isDigit(price)){
 				JOptionPane.showMessageDialog(panel, "잘못입력하셨습니다.","경고",JOptionPane.ERROR_MESSAGE);
 				amenutext.setText("");
 				apricetext.setText("");
 				setVisible(false);
-			} else if(name != null && !isDigit(price)){
+			} else if(name != null && price!=null && !isDigit(price)){
 				Menu m = new Menu(name,Integer.parseInt(price));
 				MenuManager.menu.add(m);
 				amenutext.setText("");
