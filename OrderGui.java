@@ -5,16 +5,16 @@ import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.Font;
-import java.awt.GradientPaint;
 import java.awt.GridLayout;
-import java.awt.Paint;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
@@ -39,14 +39,6 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 
-import org.jfree.chart.ChartFactory;
-import org.jfree.chart.ChartPanel;
-import org.jfree.chart.JFreeChart;
-import org.jfree.chart.plot.CategoryPlot;
-import org.jfree.chart.plot.PlotOrientation;
-import org.jfree.chart.renderer.category.BarRenderer;
-import org.jfree.data.category.DefaultCategoryDataset;
-import org.jfree.ui.RefineryUtilities;
 
 
 public class OrderGui extends JFrame {
@@ -70,20 +62,23 @@ public class OrderGui extends JFrame {
 	private JPanel orderPan;
 	private JPanel oSelect;
 	private JButton oAddbtn;
-	private JButton oListbtn;
 	private JButton oFindbtn;
 	private JButton omodify;
-	private JButton oRemove;
 	private JButton readOrderbtn;
 	private JTable lOrderArea;
 	private JButton writeOrderbtn;
-	private JPanel detail;
+	private JPanel approvalPan;
+	private JButton approval;
+	private JButton cancelApproval;
 	private JTextArea listDetail;
+	private JPanel rightPanel;
+	private JButton listOrderbtn;
+	private JButton oListbtn;
 	DefaultTableModel tableModel;
 	DefaultTableModel tableModel2;
 	ReadWrite fio = new ReadWrite();
 	String []info = {"메뉴","가격"};
-	String []info2 = {"날짜","주문번호","금액"};
+	String []info2 = {"날짜","주문번호","금액","결재"};
 	String []orderInfo = {"메뉴","수량","금액"};
 
 	/**
@@ -107,7 +102,6 @@ public class OrderGui extends JFrame {
 						e.printStackTrace();
 					}
 					OrderGui frame = new OrderGui();
-					
 					frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -141,19 +135,26 @@ public class OrderGui extends JFrame {
 		for(int i=0;i<tcm.getColumnCount();i++){
 			tcm.getColumn(i).setCellRenderer(dtcr);
 		}
+		readMenu();
 	}
 
 	public void fileBar(){
 		JMenuBar menubar = new JMenuBar();
 		JMenu file= new JMenu("file");
+		JMenuItem search = new JMenuItem("검색");
+		search.addActionListener(new ActionListener(){
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				searchMenu sm = new searchMenu();
+				sm.setVisible(true);
+			}
+			
+		});
+		file.add(search);
 		menubar.add(file);
-		JMenuItem open = new JMenuItem("open");
-		JMenuItem save = new JMenuItem("save");
-		JMenuItem exit = new JMenuItem("exit");
-		open.addActionListener(new OpenMenuListener());
-		file.add(open);
-		file.add(save);
-		file.add(exit);
+		
 		setJMenuBar(menubar);
 	}
 	public void orderManage(){
@@ -162,30 +163,38 @@ public class OrderGui extends JFrame {
 		lOrderArea.setColumnSelectionAllowed(false);
 		lOrderArea.setRowSelectionAllowed(true);
 		lOrderArea.setAutoscrolls(true);
-		new JScrollPane(lOrderArea);
-		tableModel2.addRow(info2);
+		JScrollPane scroll = new JScrollPane(lOrderArea);
 		lOrderArea.setPreferredSize(new Dimension(450,800));
-		detail = new JPanel();
-		detail.setLayout(new FlowLayout());
 		listDetail = new JTextArea("");
-		listDetail.setPreferredSize(new Dimension(450,800));
+		listDetail.setPreferredSize(new Dimension(450,700));
 		listDetail.setFont(new Font("\\OrderManager\\lib\\08SEOULNAMSANM.TTF",Font.CENTER_BASELINE,20));
+		listDetail.setEnabled(false);
 		lOrderArea.setFont(new Font("\\OrderManager\\lib\\08SEOULNAMSANM.TTF",Font.CENTER_BASELINE,18));
 		lOrderArea.setRowHeight(30);
 		orderPan = new JPanel();
 		orderPan.setLayout(new BorderLayout());
+		rightPanel = new JPanel();
+		rightPanel.setLayout(new BorderLayout());
+		rightPanel.setPreferredSize(new Dimension(450,800));
+		approvalPan = new JPanel();
+		approvalPan.setLayout(new FlowLayout());
+		approvalPane();
+		approvalPan.setBackground(Color.WHITE);
+		approvalPan.setPreferredSize(new Dimension(450,100)); 
+		rightPanel.add(listDetail,BorderLayout.CENTER);
+		rightPanel.add(approvalPan,BorderLayout.SOUTH);
 		oSelect = new JPanel();
-		oSelect.setPreferredSize(new Dimension(900,100));
-		oSelect.setLayout(new GridLayout(1,6,5,5));
+		oSelect.setPreferredSize(new Dimension(1000,100));
+		oSelect.setLayout(new GridLayout(1,4,5,5));
 		oAddbtn = new JButton("주문 추가");
 		oAddbtn.setFont(new Font("\\OrderManager\\lib\\08SEOULNAMSANM.TTF",Font.BOLD,20));
 		oAddbtn.addActionListener(new addOrderListener());
 		oFindbtn= new JButton("판매 분석");
 		oFindbtn.setFont(new Font("\\OrderManager\\lib\\08SEOULNAMSANM.TTF",Font.BOLD,20));
 		oFindbtn.addActionListener(new findOrderListener());
-		oRemove = new JButton("주문 제거");
-		oRemove.setFont(new Font("\\OrderManager\\lib\\08SEOULNAMSANM.TTF",Font.BOLD,20));
-		oRemove.addActionListener(new removeOrderListener());
+		omodify = new JButton("주문 수정");
+		omodify.setFont(new Font("\\OrderManager\\lib\\08SEOULNAMSANM.TTF",Font.BOLD,20));
+		omodify.addActionListener(new modifyListener());
 		oListbtn = new JButton("주문 내역");
 		oListbtn.addActionListener(new listOrderListener());
 		oListbtn.setFont(new Font("\\OrderManager\\lib\\08SEOULNAMSANM.TTF",Font.BOLD,20));
@@ -198,17 +207,48 @@ public class OrderGui extends JFrame {
 		ListSelectionModel listMod = lOrderArea.getSelectionModel();
 		listMod.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		listMod.addListSelectionListener(new selectTableListener());
-		detail.add(lOrderArea);
-		detail.add(listDetail);
 		oSelect.add(oAddbtn);
-		oSelect.add(oRemove);
+		oSelect.add(omodify);
 		oSelect.add(oFindbtn);
 		oSelect.add(oListbtn);
 		oSelect.add(readOrderbtn);
 		oSelect.add(writeOrderbtn);
 		orderPan.add(oSelect,BorderLayout.PAGE_START);
-		orderPan.add(lOrderArea,BorderLayout.CENTER);
-		orderPan.add(detail,BorderLayout.EAST);
+		orderPan.add(scroll,BorderLayout.CENTER);
+		orderPan.add(rightPanel,BorderLayout.EAST);
+	}
+	void approvalPane(){
+		approval = new JButton("결재");
+		approval.setPreferredSize(new Dimension(220,80));
+		approval.addActionListener(new approvalListener());
+		cancelApproval = new JButton("취소/삭제");
+		cancelApproval.setPreferredSize(new Dimension(220,80));
+		cancelApproval.addActionListener(new removeOrderListener());
+		approvalPan.removeAll();
+		approvalPan.add(approval);
+		approvalPan.add(cancelApproval);
+		approvalPan.updateUI();
+	}
+	void listOrderPane(){
+
+		listOrderbtn = new JButton("홈");
+		listOrderbtn.setPreferredSize(new Dimension(220,80));
+		listOrderbtn.addActionListener(new ActionListener(){
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				approvalPane();
+				listOrder();				
+			}
+		});
+		cancelApproval = new JButton("삭제");
+		cancelApproval.setPreferredSize(new Dimension(220,80));
+		cancelApproval.addActionListener(new removeOrderListener());
+		approvalPan.removeAll();
+		approvalPan.add(listOrderbtn);
+		approvalPan.add(cancelApproval);
+		orderPan.updateUI();
 	}
 	public void menuManage(){
 		//JTable
@@ -250,6 +290,17 @@ public class OrderGui extends JFrame {
 		menuPan.add(mSelect,BorderLayout.PAGE_START);
 		menuPan.add("Center", lMenuArea);
 	}
+	public void readMenu(){
+		try{
+			ArrayList<Menu> menu2 = fio.input("data.dat");
+			if(menu2!=null){
+				for(Menu i: menu2){
+					MenuManager.menu.add(i);
+					addRow(i);
+				}
+			}
+		}catch(Exception ex){}
+	}
 	public void removetable(DefaultTableModel table){
 		while(table.getRowCount()!=0){
 			table.removeRow(0);
@@ -258,7 +309,6 @@ public class OrderGui extends JFrame {
 	public void read(ArrayList<Menu> menu){
 		Object [] data = new Object[2];
 		removetable(tableModel);
-		tableModel.addRow(info);
 		if(menu!=null){
 			for(Menu i : menu){
 				data[0] = i.getName();
@@ -274,26 +324,48 @@ public class OrderGui extends JFrame {
 		tableModel.addRow(data);
 	}
 	public void addRow(Order order){
-		Object[] data = new Object[3];
+		Object[] data = new Object[4];
 		data[0] = order.getOrderDate();
 		data[1] = order.getOrderNumber();
 		data[2] = order.getTotalPrice();
+		data[3] = order.getApproval();
 		tableModel2.addRow(data);
 	}
 	public void listOrder(){
-		Object [] data = new Object[3];
+		Object [] data = new Object[4];
 		removetable(tableModel2);
-		tableModel2.addRow(info2);
 
 		for(int i=0 ;i<OrderManager.order.size();i++){
 			data[0]=OrderManager.order.get(i).getOrderDate();
 			data[1]=OrderManager.order.get(i).getOrderNumber();
 			data[2]=OrderManager.order.get(i).totalPrice;
+			data[3] = OrderManager.order.get(i).getApproval();
 			tableModel2.addRow(data);
 		}
-
-
 	}
+	public class approvalListener implements ActionListener{
+		int selRow;
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			// TODO Auto-generated method stub
+			Object value;
+			selRow = lOrderArea.getSelectedRow();
+			if(selRow>=0){
+				TableModel tm = lOrderArea.getModel();
+				value =tm.getValueAt(selRow, 1);
+				int index = OrderManager.indexOfOrder((int)value);
+				int reply = JOptionPane.showConfirmDialog(null, "결재 완료 하시겠습니까?","결재확인", JOptionPane.YES_NO_OPTION);
+				if(reply == JOptionPane.YES_NO_OPTION){
+					OrderManager.order.get(index).setApproval("완료");
+					tm.setValueAt(OrderManager.order.get(index).getApproval(), selRow, 3);
+				} else{
+					OrderManager.order.get(index).setApproval("미완료");
+				}
+			}
+		}
+		
+	}
+	
 	public class SaveMenuListener implements ActionListener{
 
 		@Override
@@ -405,7 +477,6 @@ public class OrderGui extends JFrame {
 		
 	}
 	public class modifyMenuListener implements ActionListener{
-
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			// TODO Auto-generated method stub
@@ -428,7 +499,21 @@ public class OrderGui extends JFrame {
 		public void actionPerformed(ActionEvent e) {
 			// TODO Auto-generated method stub
 			addOrder a = new addOrder(tableModel2);
+			
 			a.setVisible(true);
+		}
+		
+	}
+	public class modifyListener implements ActionListener{
+		int selRow;
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			// TODO Auto-generated method stub
+			selRow = lOrderArea.getSelectedRow();
+			if(selRow>=0){
+				addOrder modify = new addOrder(tableModel2,selRow);
+				modify.setVisible(true);
+			}
 		}
 		
 	}
@@ -437,7 +522,20 @@ public class OrderGui extends JFrame {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			// TODO Auto-generated method stub
-			listOrder();
+			listOrderPane();
+			Object [] data = new Object[4];
+			removetable(tableModel2);
+
+			for(int i=0 ;i<OrderManager.order.size();i++){
+				if(OrderManager.order.get(i).getApproval().equals("미완료")){
+				} else{
+					data[0]=OrderManager.order.get(i).getOrderDate();
+					data[1]=OrderManager.order.get(i).getOrderNumber();
+					data[2]=OrderManager.order.get(i).totalPrice;
+					data[3] = OrderManager.order.get(i).getApproval();
+					tableModel2.addRow(data);
+					}
+			}
 		}
 	}
 	public class selectTableListener implements ListSelectionListener{
@@ -451,7 +549,7 @@ public class OrderGui extends JFrame {
 				selRows = lOrderArea.getSelectedRow();
 				listDetail.setText("");
 				listDetail.setEnabled(false);
-				if(selRows>0){
+				if(selRows>=0){
 					TableModel tm = lOrderArea.getModel();
 					Value = tm.getValueAt(selRows, 1);
 					int index = OrderManager.indexOfOrder((int) Value);
@@ -465,29 +563,22 @@ public class OrderGui extends JFrame {
 		}	
 	}
 	public class removeOrderListener implements ActionListener{
-
+		int selRow;
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			// TODO Auto-generated method stub
-			String OrderNumber = JOptionPane.showInputDialog("제거할 주문번호를 입력하세요");
-			if(OrderNumber == null || isDigit(OrderNumber)){
-				JOptionPane.showMessageDialog(null, "잘못입력하셨습니다.");
-			} else if(OrderManager.indexOfOrder(Integer.parseInt(OrderNumber))>OrderManager.order.size()){
-				JOptionPane.showMessageDialog(null, "잘못입력하셨습니다.");
-			} else{
-				int num = OrderManager.indexOfOrder(Integer.parseInt(OrderNumber));
-				OrderManager.order.remove(num);
-				listOrder();
-			}
-		}
-		boolean isDigit(String str){
-			for(int i=0; i<str.length();i++){
-				char c = str.charAt(i);
-				if(!Character.isDigit(c)){
-					return true; // 문자가 있을경우
+			selRow = lOrderArea.getSelectedRow();
+			if(selRow>=0){
+				TableModel tm = lOrderArea.getModel();
+				int OrderNumber = (int)tm.getValueAt(selRow, 1);
+				if(OrderManager.indexOfOrder(OrderNumber)>OrderManager.order.size()){
+					JOptionPane.showMessageDialog(null, "잘못입력하셨습니다.");
+				} else{
+					int num = OrderManager.indexOfOrder(OrderNumber);
+					OrderManager.order.remove(num);
+					tableModel2.removeRow(selRow);
 				}
 			}
-			return false; // 숫자로만 되어있을경우
 		}
 	}
 	public class findOrderListener implements ActionListener{
@@ -501,361 +592,300 @@ public class OrderGui extends JFrame {
 		
 	}
 }
-class findOrder extends JFrame{
+class searchMenu extends JFrame{
+
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private String[] ChartList = {
-			"메뉴별 판매 현황",
-			"월별 판매 현황",
-			"요일별 매출현황"
-	};
-	private Container content;
-	JComboBox<String> box;
+	Container content;
+	JPanel pane;
+	JComboBox<String> list;
 	JButton confirm;
 	JButton cancel;
-	findOrder(){
+	JLabel search;
+	JComboBox<String> menu;
+	String listSearch[] = {
+			"메뉴",
+			"날짜",
+			"요일",
+			"몇 원 이상"
+	};
+	confirmListener con = new confirmListener();
+	menuconfirmListener men = new menuconfirmListener();
+	searchMenu(){
 		content = getContentPane();
-		content.setLayout(new GridLayout(2,2));
+		createPanel();
+		content.add(pane,BorderLayout.CENTER);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		setBounds(500,500,250,200);
-		Combobox();
+		setBounds(500,500,250,250);
 	}
-	void Combobox(){
-		content.add(new JLabel("차트 종류"));
-		box = new JComboBox<String>(ChartList);
-		content.add(box);
-		confirm  = new JButton("확인");
-		confirm.addActionListener(new confirmListener());
+	void createPanel(){
+		pane = new JPanel();
+		pane.setLayout(new GridLayout(2,2));
+		search = new JLabel("검색 종류");
+		list = new JComboBox<String>(listSearch);
+		confirm = new JButton("확인");
+		confirm.addActionListener(con);
 		cancel = new JButton("취소");
-		content.add(confirm);
-		content.add(cancel);
+		pane.add(search);
+		pane.add(list);
+		pane.add(confirm);
+		pane.add(cancel);
 	}
 	public class confirmListener implements ActionListener{
+		public void actionPerformed(ActionEvent e){
+			String select = (String)list.getSelectedItem();
+			if(select.equals("메뉴")){
+				selectMenu();
+				setVisible(false);
+			} else if(select.equals("날짜")){
+				selectDate sd = new selectDate();
+				setVisible(false);
+			} else if(select.equals("요일")){
+				
+			} else if(select.equals("몇 원 이상")){
+				
+			}
+		}
+	}
+	public class menuconfirmListener implements ActionListener{
+		public void actionPerformed(ActionEvent e){
+			String menu = (String)list.getSelectedItem();
+			if(menu!=null){
+				searchMenuOrder sm = new searchMenuOrder(menu);
+				sm.setVisible(true);
+			}
+		}
+	}
+	public class dateconfirmListener implements ActionListener{
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			// TODO Auto-generated method stub
-			String list = (String) box.getSelectedItem();
-			if(list.equals(ChartList[0])){
-				CountPerMenu cpm = new CountPerMenu("메뉴별 판매현황");
-				//cpm.pack();
-				RefineryUtilities.centerFrameOnScreen(cpm);
-				cpm.setVisible(true);
-				setVisible(false);
-			} else if(list.equals(ChartList[1])){
-				CountperMonth cpM = new CountperMonth("월별 매출현황");
-				//cpM.pack();
-				RefineryUtilities.centerFrameOnScreen(cpM);
-				cpM.setVisible(true);
-				setVisible(false);
-			}
-			else if(list.equals(ChartList[2])){
-				Countperday cpd = new Countperday("요일별 매출현황");
-				//cpd.pack();
-				RefineryUtilities.centerFrameOnScreen(cpd);
-				cpd.setVisible(true);
-				setVisible(false);
-			}
-
+			
 		}
 		
 	}
+	void selectMenu(){
+		String menuName[] = new String[MenuManager.menu.size()];
+		list.removeAllItems();
+		for(int i =0 ;i<MenuManager.menu.size();i++){
+			menuName[i]=MenuManager.menu.get(i).getName();
+			list.addItem(menuName[i]);
+		}
+		search.setText("메뉴");
+		pane.updateUI();
+		confirm.removeActionListener(con);
+		confirm.addActionListener(men);
+	}
 }
-
-class CountperMonth extends JFrame{
+class selectDate extends JFrame{
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	int Price[] = new int[12];
-	DefaultCategoryDataset dataset = new DefaultCategoryDataset();
-	JFreeChart chart;
-	String Month[]={
-			"01월",
-			"02월",
-			"03월",
-			"04월",
-			"05월",
-			"06월",
-			"07월",
-			"08월",
-			"09월",
-			"10월",
-			"11월",
-			"12월"
+	SimpleDateFormat f = new SimpleDateFormat("yyyyMMdd");
+	Container content;
+	JPanel pane;
+	JLabel Month;
+	JLabel date;
+	JComboBox<String> Monthbox;
+	JComboBox<String> datebox;
+	JButton confirm;
+	JButton cancel;
+	DefaultComboBoxModel<String> listModel;
+	String MonthList[]={
+			"01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"
 	};
-	public CountperMonth(String title) {
-		super(title);
-		// TODO Auto-generated constructor stub
-		getPriceMenu();
-		createDataset();
-		createChart();
-		ChartPanel chartPanel = new ChartPanel(chart);
-		//chartPanel.setPreferredSize(new Dimension(500,300));
-		setContentPane(chartPanel);
-		setSize(800,600);
-		//chartPanel.setPreferredSize(new Dimension(800,600));
-		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-	}
-	
-	void getPriceMenu(){
-		for(Order i : OrderManager.order){
-			for(int j=0 ;j<Price.length;j++){
-				System.out.println(i.getOrderDate().substring(6, 9));
-				if(Month[j].equals(i.getOrderDate().substring(6, 9))){
-					Price[j]=Price[j]+i.getTotalPrice();
+	String dateList[][] = new String[12][];
+	void createDateList(){
+		for(int i=0;i<MonthList.length;i++){
+			if(MonthList[i].equals("01")||MonthList[i].equals("03")||MonthList[i].equals("05")||
+					MonthList[i].equals("07")||MonthList[i].equals("08")||MonthList[i].equals("10")||MonthList[i].equals("12")){
+				dateList[i]= new String[31];
+				for(int j=0;j<31;j++){
+					dateList[i][j]=String.valueOf(j+1);
+				}
+			} else if(MonthList[i].equals("04")||MonthList[i].equals("06")||MonthList[i].equals("09")||
+					MonthList[i].equals("11")){
+				dateList[i] = new String[30];
+				for(int j=0;j<30;j++){
+					dateList[i][j]=String.valueOf(j+1);
+				}
+			} else{
+				dateList[i] = new String[28];
+				for(int j=0 ;j<28;j++){
+					dateList[i][j]=String.valueOf(j+1);
 				}
 			}
 		}
-		System.out.println(Price);
 	}
-	void createDataset(){
-		String category = "월별 매출현황";
-		for(int i=0;i<Price.length;i++){
-			dataset.addValue(Price[i],Month[i],category);
-		}
+	selectDate(){
+		createPane();
+		content = getContentPane();
+		setBounds(500,500,200,200);
+		content.add(pane);
+		setVisible(true);
 	}
-	void createChart(){
-		chart = ChartFactory.createBarChart(
-				"월별 매출현황",
-				"월",
-				"매출",
-				dataset,
-				PlotOrientation.VERTICAL,
-				true,
-				true,
-				false
-				);
-		chart.setBackgroundPaint(Color.WHITE);
-		CategoryPlot plot = chart.getCategoryPlot();
-		plot.setBackgroundPaint(Color.LIGHT_GRAY);
-		plot.setDomainGridlinePaint(Color.white);
-		plot.setRangeGridlinePaint(Color.white);
-		Font chartFont = chart.getTitle().getFont();
-		chart.getTitle().setFont(new Font("굴림",chartFont.getStyle(),chartFont.getSize()));
-		chartFont = plot.getDomainAxis().getLabelFont();
-		plot.getDomainAxis().setLabelFont(new Font("굴림",chartFont.getStyle(),chartFont.getSize()));
-		chartFont = plot.getDomainAxis().getTickLabelFont();
-		plot.getDomainAxis().setTickLabelFont((new Font("굴림",chartFont.getStyle(),chartFont.getSize())));
-		chartFont = plot.getRangeAxis().getLabelFont();
-		plot.getRangeAxis().setLabelFont(new Font("굴림",chartFont.getStyle(),chartFont.getSize()));
-		chartFont = plot.getRangeAxis().getTickLabelFont();
-		plot.getRangeAxis().setTickLabelFont(new Font("굴림",chartFont.getStyle(),chartFont.getSize()));
-		BarRenderer renderer = (BarRenderer) plot.getRenderer();
-		renderer.setDrawBarOutline(false);
-		GradientPaint gp[] = new GradientPaint[MenuManager.menu.size()];
-		Paint paint[] = {
-				Color.BLUE,
-				Color.cyan,
-				Color.orange,
-				Color.green,
-				Color.pink,
-				Color.yellow,
-				Color.red,
-				Color.DARK_GRAY,
-				Color.MAGENTA,
-		};
-		int j  = 0;
-		for(int i =0 ;i<gp.length;i++){
-			if(i<paint.length){
-				gp[i]= new GradientPaint(
-						0.0f,0.0f,(Color) paint[j],
-						0.0f,0.0f,Color.LIGHT_GRAY
-						);
-				j++;
-			} else{
-				j = 0;
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public void createPane(){
+		createDateList();
+		listModel = new DefaultComboBoxModel(dateList[0]);
+		Month = new JLabel("월");
+		date = new JLabel("일");
+		Monthbox = new JComboBox<String>(MonthList);
+		confirm = new JButton("확인");
+		confirm.addActionListener(new ActionListener(){
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				searchDateOrder sd = new searchDateOrder((String)Monthbox.getSelectedItem(),(String)listModel.getSelectedItem());
+				sd.setVisible(true);
 			}
-			renderer.setSeriesPaint(i, gp[i]);
-		}
-		renderer.setMaximumBarWidth(.35);
-	}
-	class windowCloseListener implements WindowListener{
-
-		public void windowClosing(WindowEvent e){
-			dispose();
-		}
-
-		@Override
-		public void windowOpened(WindowEvent e) {
-			// TODO Auto-generated method stub
 			
-		}
+		});
+		cancel = new JButton("취소");
+		cancel.addActionListener(new ActionListener(){
 
-		@Override
-		public void windowClosed(WindowEvent e) {
-			// TODO Auto-generated method stub
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				setVisible(false);
+			}
 			
+		});
+		pane = new JPanel();
+		pane.setLayout(new GridLayout(3,3));
+		pane.setPreferredSize(new Dimension(240,240));
+		for(int i=0;i<31;i++){
+			listModel.addElement(dateList[0][i]);
 		}
-
-		@Override
-		public void windowIconified(WindowEvent e) {
-			// TODO Auto-generated method stub
-			
-		}
-
-		@Override
-		public void windowDeiconified(WindowEvent e) {
-			// TODO Auto-generated method stub
-			
-		}
-
-		@Override
-		public void windowActivated(WindowEvent e) {
-			// TODO Auto-generated method stub
-			
-		}
-
-		@Override
-		public void windowDeactivated(WindowEvent e) {
-			// TODO Auto-generated method stub
-			
-		}
+		datebox = new JComboBox<String>(listModel);
+		datebox.setMaximumRowCount(listModel.getSize());
+		Monthbox.addItemListener(new ItemListener(){
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				// TODO Auto-generated method stub
+				for(int i=0 ; i<MonthList.length;i++){
+					if(MonthList[i].equals(Monthbox.getSelectedItem())){
+						listModel.removeAllElements();
+						for(int j = 0;j<dateList[i].length;j++){
+							listModel.addElement(dateList[i][j]);
+						}
+						datebox.setMaximumRowCount(listModel.getSize());
+					}
+				}
+			}
+		});
+		pane.add(Month);
+		pane.add(Monthbox);
+		pane.add(date);
+		pane.add(datebox);
+		pane.add(confirm);
+		pane.add(cancel);
 	}
 }
-class Countperday extends JFrame{
+class searchDateOrder extends JFrame{
+
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	int Price[] = new int[7];
-	DefaultCategoryDataset dataset = new DefaultCategoryDataset();
-	JFreeChart chart;
-	String day[]={
-			"월요일",
-			"화요일",
-			"수요일",
-			"목요일",
-			"금요일",
-			"토요일",
-			"일요일",
-	};
-	public Countperday(String title) {
-		super(title);
-		// TODO Auto-generated constructor stub
-		getPriceMenu();
-		createDataset();
-		createChart();
-		ChartPanel chartPanel = new ChartPanel(chart);
-		//chartPanel.setPreferredSize(new Dimension(500,300));
-		setContentPane(chartPanel);
-		setSize(800,600);
+	Container content;
+	JPanel leftPane;
+	JPanel rightPane;
+	JTable table;
+	DefaultTableModel tableModel;
+	JTextArea listDetail;
+	JScrollPane scroll;
+	String []info2 = {"날짜","주문번호","금액","결재"};
+	String month,date;
+	searchDateOrder(String month,String date){
+		this.month = month;
+		this.date = date;
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		setBounds(300,300,1200,800);
+		content = getContentPane();
+		createPane();
+		DefaultTableCellRenderer dtcr = new DefaultTableCellRenderer();
+		dtcr.setHorizontalAlignment(SwingConstants.CENTER);
+		TableColumnModel tcm = table.getColumnModel();
+		for(int i=0;i<tcm.getColumnCount();i++){
+			tcm.getColumn(i).setCellRenderer(dtcr);
+		}
+
+		content.add(scroll, BorderLayout.CENTER);
+		content.add(listDetail,BorderLayout.EAST);
 	}
-	
-	void getPriceMenu(){
-		for(Order i : OrderManager.order){
-			for(int j=0 ;j<Price.length;j++){
-				if(day[j].equals(i.getOrderDate().substring(14, 17))){
-					Price[j]=Price[j]+i.getTotalPrice();
+	public void createPane(){
+		tableModel = new DefaultTableModel(info2,0);
+		table = new JTable(tableModel);
+		table.setColumnSelectionAllowed(false);
+		table.setRowSelectionAllowed(true);
+		table.setAutoscrolls(true);
+		scroll = new JScrollPane(table);
+		table.setPreferredSize(new Dimension(500,800));
+		listDetail = new JTextArea("");
+		listDetail.setPreferredSize(new Dimension(500,800));
+		listDetail.setFont(new Font("\\OrderManager\\lib\\08SEOULNAMSANM.TTF",Font.CENTER_BASELINE,20));
+		listDetail.setEnabled(false);
+		table.setFont(new Font("\\OrderManager\\lib\\08SEOULNAMSANM.TTF",Font.CENTER_BASELINE,18));
+		table.setRowHeight(30);
+		rightPane = new JPanel();
+		leftPane = new JPanel();
+		listOrder();
+		leftPane.setPreferredSize(new Dimension(500,800));
+		rightPane.setPreferredSize(new Dimension(500,800));
+		ListSelectionModel listMod = table.getSelectionModel();
+		listMod.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		listMod.addListSelectionListener(new selectTableListener());
+	}
+	public void removetable(DefaultTableModel table){
+		while(table.getRowCount()!=0){
+			table.removeRow(0);
+		}
+	}
+	public void listOrder(){
+		Object [] data = new Object[4];
+		removetable(tableModel);
+		for(int i=0 ;i<OrderManager.order.size();i++){
+			System.out.println(OrderManager.order.get(i).getOrderDate().substring(6, 8));
+			System.out.println(OrderManager.order.get(i).getOrderDate().substring(10, 12));
+			if(OrderManager.order.get(i).getOrderDate().substring(6,8).equals(month) && OrderManager.order.get(i).getOrderDate().substring(10, 12).equals(date)){
+				for(sellMenu j : OrderManager.order.get(i).getOrderList()){
+					data[0]=OrderManager.order.get(i).getOrderDate();
+					data[1]=OrderManager.order.get(i).getOrderNumber();
+				data[2]=OrderManager.order.get(i).totalPrice;
+				data[3] = OrderManager.order.get(i).getApproval();
+				tableModel.addRow(data);
 				}
 			}
 		}
-		System.out.println(Price);
 	}
-	void createDataset(){
-		String category = "요일별 판매현황";
-		for(int i=0;i<Price.length;i++){
-			dataset.addValue(Price[i],day[i],category);
-		}
-	}
-	void createChart(){
-		chart = ChartFactory.createBarChart(
-				"요일별 판매현황",
-				"요일",
-				"매출",
-				dataset,
-				PlotOrientation.VERTICAL,
-				true,
-				true,
-				false
-				);
-		chart.setBackgroundPaint(Color.WHITE);
-		CategoryPlot plot = chart.getCategoryPlot();
-		plot.setBackgroundPaint(Color.LIGHT_GRAY);
-		plot.setDomainGridlinePaint(Color.white);
-		plot.setRangeGridlinePaint(Color.white);
-		Font chartFont = chart.getTitle().getFont();
-		chart.getTitle().setFont(new Font("굴림",chartFont.getStyle(),chartFont.getSize()));
-		chartFont = plot.getDomainAxis().getLabelFont();
-		plot.getDomainAxis().setLabelFont(new Font("굴림",chartFont.getStyle(),chartFont.getSize()));
-		chartFont = plot.getDomainAxis().getTickLabelFont();
-		plot.getDomainAxis().setTickLabelFont((new Font("굴림",chartFont.getStyle(),chartFont.getSize())));
-		chartFont = plot.getRangeAxis().getLabelFont();
-		plot.getRangeAxis().setLabelFont(new Font("굴림",chartFont.getStyle(),chartFont.getSize()));
-		chartFont = plot.getRangeAxis().getTickLabelFont();
-		plot.getRangeAxis().setTickLabelFont(new Font("굴림",chartFont.getStyle(),chartFont.getSize()));
-		BarRenderer renderer = (BarRenderer) plot.getRenderer();
-		renderer.setDrawBarOutline(false);
-		GradientPaint gp[] = new GradientPaint[MenuManager.menu.size()];
-		Paint paint[] = {
-				Color.BLUE,
-				Color.cyan,
-				Color.orange,
-				Color.green,
-				Color.pink,
-				Color.yellow,
-				Color.red,
-				Color.DARK_GRAY,
-				Color.MAGENTA,
-		};
-		int j  = 0;
-		for(int i =0 ;i<gp.length;i++){
-			if(i<paint.length){
-				gp[i]= new GradientPaint(
-						0.0f,0.0f,(Color) paint[j],
-						0.0f,0.0f,Color.LIGHT_GRAY
-						);
-				j++;
-			} else{
-				j = 0;
+	public class selectTableListener implements ListSelectionListener{
+
+		@Override
+		public void valueChanged(ListSelectionEvent e) {
+			// TODO Auto-generated method stub
+			int selRows;
+			Object Value;
+			if(!e.getValueIsAdjusting()){
+				selRows = table.getSelectedRow();
+				listDetail.setText("");
+				listDetail.setEnabled(false);
+				if(selRows>=0){
+					TableModel tm = table.getModel();
+					Value = tm.getValueAt(selRows, 1);
+					int index = OrderManager.indexOfOrder((int) Value);
+					listDetail.append(OrderManager.order.get(index).getOrderDate()+"\n");
+					listDetail.append("메뉴명\t수량\t금액\n");
+					for(sellMenu i : OrderManager.order.get(index).order){
+						listDetail.append(i.getName()+"\t"+i.getCount()+"\t"+i.getPrice()*i.getCount()+"\n");
+					}
+				}
 			}
-			renderer.setSeriesPaint(i, gp[i]);
-		}
-		renderer.setMaximumBarWidth(.35);
-	}
-	class windowCloseListener implements WindowListener{
-
-		public void windowClosing(WindowEvent e){
-			dispose();
-		}
-
-		@Override
-		public void windowOpened(WindowEvent e) {
-			// TODO Auto-generated method stub
-			
-		}
-
-		@Override
-		public void windowClosed(WindowEvent e) {
-			// TODO Auto-generated method stub
-			
-		}
-
-		@Override
-		public void windowIconified(WindowEvent e) {
-			// TODO Auto-generated method stub
-			
-		}
-
-		@Override
-		public void windowDeiconified(WindowEvent e) {
-			// TODO Auto-generated method stub
-			
-		}
-
-		@Override
-		public void windowActivated(WindowEvent e) {
-			// TODO Auto-generated method stub
-			
-		}
-
-		@Override
-		public void windowDeactivated(WindowEvent e) {
-			// TODO Auto-generated method stub
-			
-		}
+		}	
 	}
 }

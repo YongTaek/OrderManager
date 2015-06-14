@@ -16,20 +16,27 @@ import org.jfree.chart.renderer.category.BarRenderer;
 import org.jfree.data.category.DefaultCategoryDataset;
 
 
-class CountPerMenu extends JFrame{
+class Countperday extends JFrame{
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	int count[] = new int[MenuManager.menu.size()];
+	int Price[] = new int[7];
 	DefaultCategoryDataset dataset = new DefaultCategoryDataset();
 	JFreeChart chart;
-
-	public CountPerMenu(String title) {
+	String day[]={
+			"월요일",
+			"화요일",
+			"수요일",
+			"목요일",
+			"금요일",
+			"토요일",
+			"일요일",
+	};
+	public Countperday(String title) {
 		super(title);
 		// TODO Auto-generated constructor stub
-		getCountMenu();
-		System.out.println(count);
+		getPriceMenu();
 		createDataset();
 		createChart();
 		ChartPanel chartPanel = new ChartPanel(chart);
@@ -38,28 +45,28 @@ class CountPerMenu extends JFrame{
 		setSize(800,600);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 	}
-	void getCountMenu(){
+	
+	void getPriceMenu(){
 		for(Order i : OrderManager.order){
-			for(sellMenu j : i.order){
-				for(int k=0; k<MenuManager.menu.size();k++){
-					if(j.getName().equals(MenuManager.menu.get(k).getName())){
-						count[k]= count[k]+j.getCount();
-					}
+			for(int j=0 ;j<Price.length;j++){
+				if(day[j].equals(i.getOrderDate().substring(14, 17))){
+					Price[j]=Price[j]+i.getTotalPrice();
 				}
 			}
 		}
+		System.out.println(Price);
 	}
 	void createDataset(){
-		String category = "메뉴별 판매현황";
-		for(int i=0;i<MenuManager.menu.size();i++){
-			dataset.addValue(count[i],MenuManager.menu.get(i).getName(),category);
+		String category = "요일별 판매현황";
+		for(int i=0;i<Price.length;i++){
+			dataset.addValue(Price[i],day[i],category);
 		}
 	}
 	void createChart(){
 		chart = ChartFactory.createBarChart(
-				"메뉴별 판매현황",
-				"메뉴",
-				"판매량",
+				"요일별 판매현황",
+				"요일",
+				"매출",
 				dataset,
 				PlotOrientation.VERTICAL,
 				true,

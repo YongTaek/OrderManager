@@ -16,50 +16,64 @@ import org.jfree.chart.renderer.category.BarRenderer;
 import org.jfree.data.category.DefaultCategoryDataset;
 
 
-class CountPerMenu extends JFrame{
+class CountperMonth extends JFrame{
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	int count[] = new int[MenuManager.menu.size()];
+	int Price[] = new int[12];
 	DefaultCategoryDataset dataset = new DefaultCategoryDataset();
 	JFreeChart chart;
-
-	public CountPerMenu(String title) {
+	String Month[]={
+			"01월",
+			"02월",
+			"03월",
+			"04월",
+			"05월",
+			"06월",
+			"07월",
+			"08월",
+			"09월",
+			"10월",
+			"11월",
+			"12월"
+	};
+	public CountperMonth(String title) {
 		super(title);
 		// TODO Auto-generated constructor stub
-		getCountMenu();
-		System.out.println(count);
+		getPriceMenu();
 		createDataset();
 		createChart();
 		ChartPanel chartPanel = new ChartPanel(chart);
 		//chartPanel.setPreferredSize(new Dimension(500,300));
 		setContentPane(chartPanel);
 		setSize(800,600);
+		//chartPanel.setPreferredSize(new Dimension(800,600));
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 	}
-	void getCountMenu(){
+	
+	void getPriceMenu(){
 		for(Order i : OrderManager.order){
-			for(sellMenu j : i.order){
-				for(int k=0; k<MenuManager.menu.size();k++){
-					if(j.getName().equals(MenuManager.menu.get(k).getName())){
-						count[k]= count[k]+j.getCount();
-					}
+			for(int j=0 ;j<Price.length;j++){
+				System.out.println(i.getOrderDate().substring(6, 9));
+				if(Month[j].equals(i.getOrderDate().substring(6, 9))){
+					Price[j]=Price[j]+i.getTotalPrice();
 				}
 			}
 		}
+		System.out.println(Price);
 	}
 	void createDataset(){
-		String category = "메뉴별 판매현황";
-		for(int i=0;i<MenuManager.menu.size();i++){
-			dataset.addValue(count[i],MenuManager.menu.get(i).getName(),category);
+		String category = "월별 매출현황";
+		for(int i=0;i<Price.length;i++){
+			dataset.addValue(Price[i],Month[i],category);
 		}
 	}
 	void createChart(){
 		chart = ChartFactory.createBarChart(
-				"메뉴별 판매현황",
-				"메뉴",
-				"판매량",
+				"월별 매출현황",
+				"월",
+				"매출",
 				dataset,
 				PlotOrientation.VERTICAL,
 				true,
