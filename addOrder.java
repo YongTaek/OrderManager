@@ -222,6 +222,15 @@ class addOrder extends JFrame{
 		pan.add(panel,BorderLayout.CENTER);
 		//pan.add(panel2,BorderLayout.SOUTH);
 	}
+	boolean isDigit(String str){
+		for(int i=0; i<str.length();i++){
+			char c = str.charAt(i);
+			if(!Character.isDigit(c)){
+				return true; // 문자가 있을경우
+			}
+		}
+		return false; // 숫자로만 되어있을경우
+	}
 	int checkOrder(String name){
 		int index = order.size()+1;
 		for(int i=0;i<order.size();i++){
@@ -235,9 +244,8 @@ class addOrder extends JFrame{
 	void readList(int index){
 		System.out.println(lo);
 		for(int i =0 ; i<order.size();i++){
-			System.out.println(1);
-			lo.addArea(order.get(i), totalMenuPrice(order.get(i)));
-			
+			System.out.println(i);
+			lo.addArea(order.get(i), totalMenuPrice(order.get(i)));	
 		}
 	}
 	public class btnActionListener implements ActionListener{
@@ -256,7 +264,12 @@ class addOrder extends JFrame{
 				
 			} else{
 				order.get(index).setCount(order.get(index).getCount()+1);
-				lo.addArea(order.get(index),totalMenuPrice(order.get(index)));
+				if(order.get(index).getCount()==0){
+					lo.addArea(order.get(index), totalMenuPrice(order.get(index)));
+					order.remove(index);
+				} else{
+					lo.addArea(order.get(index),totalMenuPrice(order.get(index)));
+				}
 			}
 			System.out.println(name);
 		}
@@ -285,7 +298,12 @@ class addOrder extends JFrame{
 				if((int)value>0){
 					int index = checkOrder((String)tm.getValueAt(selRow, 0));
 					order.get(index).setCount((int)value-1);
-					lo.addArea(order.get(index),totalMenuPrice(order.get(index)));
+					if(order.get(index).getCount()==0){
+						lo.addArea(order.get(index),totalMenuPrice(order.get(index)));
+						order.remove(index);
+					} else{
+						lo.addArea(order.get(index),totalMenuPrice(order.get(index)));
+					}
 				}
 			}
 		}
@@ -299,16 +317,15 @@ class addOrder extends JFrame{
 			if(order.size()!=0){
 				SimpleDateFormat f = new SimpleDateFormat("yyyy년 MM월 dd일 E요일 a h시 mm분 ss초 ");
 				String date = f.format(new Date());
-				OrderManager.order.add(new Order(OrderManager.orderCount+1,order,date,"미완료"));
-				
+				Order o = new Order(OrderGui.OrderCount+1,order,date,"미완료");
+				OrderGui.OrderCount++;
+				OrderManager.order.add(o);
 				Object [] data = new Object[4];
-				int i = OrderManager.indexOfOrder(OrderManager.orderCount+1);
-				data[0]=OrderManager.order.get(i).getOrderDate();
-				data[1]=OrderManager.order.get(i).getOrderNumber();
-				data[2]=OrderManager.order.get(i).totalPrice;
-				data[3] = OrderManager.order.get(i).getApproval();
+				data[0]=o.getOrderDate();
+				data[1]=o.getOrderNumber();
+				data[2]=o.totalPrice;
+				data[3] = o.getApproval();
 				tm.insertRow(0, data);
-				OrderManager.orderCount++;
 				setVisible(false);
 				lo.setVisible(false);
 			} else{
@@ -325,14 +342,16 @@ class addOrder extends JFrame{
 			if(order.size()!=0){
 				int index = OrderManager.indexOfOrder((int)tm.getValueAt(selRow, 1));
 				OrderManager.order.get(index).setOrderList(order);
+				OrderManager.order.get(index).settotalPrice();
 				Object [] data = new Object[4];
 				data[0]=OrderManager.order.get(index).getOrderDate();
 				data[1]=OrderManager.order.get(index).getOrderNumber();
 				data[2]=OrderManager.order.get(index).totalPrice;
 				data[3] = OrderManager.order.get(index).getApproval();
+				System.out.println(selRow);
 				tm.insertRow(selRow, data);
 				tm.removeRow(selRow+1);
-				OrderManager.orderCount++;
+				lo.orderTable.updateUI();
 				setVisible(false);
 				lo.setVisible(false);
 			} else{
@@ -390,12 +409,17 @@ class listOrder extends JFrame{
 	void addArea(sellMenu sell,int Price){
 		int index =checkArea(sell.getName(),model);
 		if(index <model.getRowCount()){
+			if(Price==0){
+				model.removeRow(index);
+				orderTable.updateUI();
+			} else{
 			Object[] data = new Object[3];
 			data[0]=sell.getName();
 			data[1]=sell.getCount();
 			data[2]=Price;
 			model.insertRow(index, data);
 			model.removeRow(index+1);
+			}
 		} else{
 			Object[] data = new Object[3];
 			data[0]=sell.getName();

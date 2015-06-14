@@ -8,13 +8,11 @@ import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.io.File;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
-import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
@@ -38,6 +36,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
+
 
 
 
@@ -80,7 +79,7 @@ public class OrderGui extends JFrame {
 	String []info = {"메뉴","가격"};
 	String []info2 = {"날짜","주문번호","금액","결재"};
 	String []orderInfo = {"메뉴","수량","금액"};
-
+	static int OrderCount;
 	/**
 	 * Launch the application.
 	 */
@@ -90,13 +89,7 @@ public class OrderGui extends JFrame {
 				try {
 					String lookAndFeel = "";
 					lookAndFeel = UIManager.getSystemLookAndFeelClassName();
-					try{ 
-						//UIManager.setLookAndFeel("com.jtattoo.plaf.smart.SmartLookAndFeel");
-						//UIManager.setLookAndFeel("com.jtattoo.plaf.mcwin.McWinLookAndFeel");
-						//UIManager.setLookAndFeel("net.infonode.gui.laf.InfoNodeLookAndFeel");
-						//UIManager.setLookAndFeel("com.birosoft.liquid.LiquidLookAndFeel");
-						//UIManager.setLookAndFeel("ch.randelshofer.quaqua.QuaquaLookAndFeel");
-						//JFrame.setDefaultLookAndFeelDecorated(true);
+					try{
 						UIManager.setLookAndFeel(lookAndFeel);
 					} catch(Exception e){
 						e.printStackTrace();
@@ -115,7 +108,7 @@ public class OrderGui extends JFrame {
 	 */
 	public OrderGui() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 1100, 800);
+		setBounds(100, 100, 1100, 900);
 		contentPane = getContentPane();
 		fileBar();
 		JTabbedPane tab = new JTabbedPane();
@@ -136,12 +129,84 @@ public class OrderGui extends JFrame {
 			tcm.getColumn(i).setCellRenderer(dtcr);
 		}
 		readMenu();
+		readOrder();
+		OrderGui.OrderCount=fio.input();
+		this.addWindowListener(new WindowListener(){
+
+			@Override
+			public void windowOpened(WindowEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void windowClosing(WindowEvent e) {
+				// TODO Auto-generated method stub
+				fio.output(MenuManager.menu, "data.dat");
+				fio.outputOrder(OrderManager.order, "data.txt");
+				fio.output(OrderCount);
+			}
+
+			@Override
+			public void windowClosed(WindowEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void windowIconified(WindowEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void windowDeiconified(WindowEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void windowActivated(WindowEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void windowDeactivated(WindowEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+		});
 	}
 
 	public void fileBar(){
 		JMenuBar menubar = new JMenuBar();
 		JMenu file= new JMenu("file");
 		JMenuItem search = new JMenuItem("검색");
+		JMenuItem modify = new JMenuItem("삭제");
+		modify.addActionListener(new ActionListener(){
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				String order = JOptionPane.showInputDialog("삭제하실 주문 번호를 입력하세요");
+				if(isDigit(order)){
+					JOptionPane.showMessageDialog(null, "숫자만 입력해주세요");
+				} else{
+					int index = OrderManager.indexOfOrder(Integer.parseInt(order));
+					if(index<OrderManager.order.size()){
+						OrderManager.order.remove(index);
+						listOrder();
+						lOrderArea.updateUI();
+					} else{
+						JOptionPane.showMessageDialog(null, "잘못입력하셨습니다.");
+
+					}
+				}
+			}
+			
+		});
 		search.addActionListener(new ActionListener(){
 
 			@Override
@@ -153,24 +218,27 @@ public class OrderGui extends JFrame {
 			
 		});
 		file.add(search);
+		file.add(modify);
 		menubar.add(file);
 		
 		setJMenuBar(menubar);
 	}
 	public void orderManage(){
+
 		tableModel2 = new DefaultTableModel(info2,0);
 		lOrderArea = new JTable(tableModel2);
 		lOrderArea.setColumnSelectionAllowed(false);
 		lOrderArea.setRowSelectionAllowed(true);
 		lOrderArea.setAutoscrolls(true);
 		JScrollPane scroll = new JScrollPane(lOrderArea);
+		lOrderArea.setRowHeight(25);
 		lOrderArea.setPreferredSize(new Dimension(450,800));
 		listDetail = new JTextArea("");
-		listDetail.setPreferredSize(new Dimension(450,700));
+		listDetail.setPreferredSize(new Dimension(450,800));
 		listDetail.setFont(new Font("\\OrderManager\\lib\\08SEOULNAMSANM.TTF",Font.CENTER_BASELINE,20));
 		listDetail.setEnabled(false);
 		lOrderArea.setFont(new Font("\\OrderManager\\lib\\08SEOULNAMSANM.TTF",Font.CENTER_BASELINE,18));
-		lOrderArea.setRowHeight(30);
+
 		orderPan = new JPanel();
 		orderPan.setLayout(new BorderLayout());
 		rightPanel = new JPanel();
@@ -290,6 +358,15 @@ public class OrderGui extends JFrame {
 		menuPan.add(mSelect,BorderLayout.PAGE_START);
 		menuPan.add("Center", lMenuArea);
 	}
+	boolean isDigit(String str){
+		for(int i=0; i<str.length();i++){
+			char c = str.charAt(i);
+			if(!Character.isDigit(c)){
+				return true; // 문자가 있을경우
+			}
+		}
+		return false; // 숫자로만 되어있을경우
+	}
 	public void readMenu(){
 		try{
 			ArrayList<Menu> menu2 = fio.input("data.dat");
@@ -298,6 +375,93 @@ public class OrderGui extends JFrame {
 					MenuManager.menu.add(i);
 					addRow(i);
 				}
+			}
+		}catch(Exception ex){}
+	}
+	public void readOrder(){
+		try{
+			ArrayList<Order> order2 =fio.inputOrder("data.txt");
+			if(order2!=null){
+				for(Order i : order2){
+					OrderManager.order.add(i);
+					addRow(i);
+				}
+				OrderManager.order.get(37).date = "2015년 08월 02일 일요일 오전 11시 45분 43초";
+				OrderManager.order.get(37).approval = "완료";
+				OrderManager.order.get(38).date = "2015년 08월 03일 월요일 오전 10시 21분 22초";
+				OrderManager.order.get(38).approval = "완료";
+				OrderManager.order.get(39).date = "2015년 08월 04일 화요일 오전 9시 48분 42초";
+				OrderManager.order.get(39).approval = "완료";
+				OrderManager.order.get(40).date = "2015년 08월 05일 수요일 오후 12시 23분 22초";
+				OrderManager.order.get(40).approval = "완료";
+				OrderManager.order.get(41).date = "2015년 08월 06일 목요일 오후 4시 23분 22초";
+				OrderManager.order.get(41).approval = "완료";
+				OrderManager.order.get(42).date = "2015년 08월 07일 금요일 오후 1시 33분 22초";
+				OrderManager.order.get(42).approval = "완료";
+				OrderManager.order.get(43).date = "2015년 08월 08일 토요일 오후 12시 23분 22초";
+				OrderManager.order.get(43).approval = "완료";
+				OrderManager.order.get(44).date = "2015년 08월 09일 일요일 오후 2시 43분 24초";
+				OrderManager.order.get(44).approval = "완료";
+				OrderManager.order.get(45).date = "2015년 09월 15일 화요일 오후 6시 43분 24초";
+				OrderManager.order.get(45).approval = "완료";
+				OrderManager.order.get(46).date = "2015년 09월 16일 수요일 오전 10시 29분 42초";
+				OrderManager.order.get(46).approval = "완료";
+				OrderManager.order.get(47).date = "2015년 09월 17일 목요일 오후 1시 23분 32초";
+				OrderManager.order.get(47).approval = "완료";
+				OrderManager.order.get(48).date = "2015년 09월 18일 금요일 오전 11시 32분 45초";
+				OrderManager.order.get(48).approval = "완료";
+				OrderManager.order.get(49).date = "2015년 09월 19일 토요일 오전 9시 23분 32초";
+				OrderManager.order.get(49).approval = "완료";
+				OrderManager.order.get(50).date = "2015년 09월 20일 일요일 오후 2시 23분 23초";
+				OrderManager.order.get(50).approval = "완료";
+				OrderManager.order.get(51).date = "2015년 09월 21일 월요일 오전 10시 32분 29초";
+				OrderManager.order.get(51).approval = "완료";
+				OrderManager.order.get(52).date = "2015년 09월 22일 화요일 오후 12시 32분 33초";
+				OrderManager.order.get(52).approval = "완료";
+				OrderManager.order.get(53).date = "2015년 10월 04일 일요일 오전 10시 23분 32초";
+				OrderManager.order.get(53).approval = "완료";
+				OrderManager.order.get(54).date = "2015년 10월 05일 월요일 오후 6시 49분 31초";
+				OrderManager.order.get(54).approval = "완료";
+				OrderManager.order.get(55).date = "2015년 10월 06일 화요일 오후 1시 23분 53초";
+				OrderManager.order.get(55).approval = "완료";
+				OrderManager.order.get(56).date = "2015년 10월 07일 수요일 오후 4시 24분 22초";
+				OrderManager.order.get(56).approval = "완료";
+				OrderManager.order.get(57).date = "2015년 10월 08일 목요일 오후 4시 24분 22초";
+				OrderManager.order.get(57).approval = "완료";
+				OrderManager.order.get(58).date = "2015년 10월 09일 금요일 오후 4시 24분 22초";
+				OrderManager.order.get(58).approval = "완료";
+				OrderManager.order.get(59).date = "2015년 10월 10일 토요일 오후 4시 24분 22초";
+				OrderManager.order.get(59).approval = "완료";
+				OrderManager.order.get(60).date = "2015년 10월 11일 일요일 오후 4시 24분 22초";
+				OrderManager.order.get(60).approval = "완료";
+				OrderManager.order.get(61).date = "2015년 11월 16일 월요일 오후 4시 24분 22초";
+				OrderManager.order.get(61).approval = "완료";
+				OrderManager.order.get(62).date = "2015년 11월 17일 화요일 오후 4시 24분 22초";
+				OrderManager.order.get(62).approval = "완료";
+				OrderManager.order.get(63).date = "2015년 11월 18일 수요일 오후 4시 24분 22초";
+				OrderManager.order.get(63).approval = "완료";
+				OrderManager.order.get(64).date = "2015년 11월 19일 수요일 오후 4시 24분 22초";
+				OrderManager.order.get(64).approval = "완료";
+				OrderManager.order.get(65).date = "2015년 11월 20일 목요일 오후 4시 24분 22초";
+				OrderManager.order.get(65).approval = "완료";
+				OrderManager.order.get(66).date = "2015년 11월 21일 금요일 오후 2시 21분 26초";
+				OrderManager.order.get(66).approval = "완료";
+				OrderManager.order.get(67).date = "2015년 11월 22일 토요일 오후 2시 21분 26초";
+				OrderManager.order.get(68).approval = "완료";
+				OrderManager.order.get(69).date = "2015년 11월 23일 일요일 오후 2시 21분 26초";
+				OrderManager.order.get(69).approval = "완료";
+				OrderManager.order.get(70).date = "2015년 12월 05일 토요일 오후 2시 21분 26초";
+				OrderManager.order.get(70).approval = "완료";
+				OrderManager.order.get(71).date = "2015년 12월 06일 일요일 오후 2시 21분 26초";
+				OrderManager.order.get(71).approval = "완료";
+				OrderManager.order.get(72).date = "2015년 12월 07일 월요일 오후 2시 21분 26초";
+				OrderManager.order.get(72).approval = "완료";
+				OrderManager.order.get(73).date = "2015년 12월 08일 화요일 오후 2시 21분 26초";
+				OrderManager.order.get(73).approval = "완료";
+				OrderManager.order.get(74).date = "2015년 12월 09일 수요일 오후 2시 21분 26초";
+				OrderManager.order.get(74).approval = "완료";
+				OrderManager.order.get(75).date = "2015년 12월 10일 목요일 오후 2시 21분 26초";
+				OrderManager.order.get(75).approval = "완료";
 			}
 		}catch(Exception ex){}
 	}
@@ -329,7 +493,7 @@ public class OrderGui extends JFrame {
 		data[1] = order.getOrderNumber();
 		data[2] = order.getTotalPrice();
 		data[3] = order.getApproval();
-		tableModel2.addRow(data);
+		tableModel2.insertRow(0,data);
 	}
 	public void listOrder(){
 		Object [] data = new Object[4];
@@ -340,7 +504,7 @@ public class OrderGui extends JFrame {
 			data[1]=OrderManager.order.get(i).getOrderNumber();
 			data[2]=OrderManager.order.get(i).totalPrice;
 			data[3] = OrderManager.order.get(i).getApproval();
-			tableModel2.addRow(data);
+			tableModel2.insertRow(0,data);
 		}
 	}
 	public class approvalListener implements ActionListener{
@@ -533,7 +697,7 @@ public class OrderGui extends JFrame {
 					data[1]=OrderManager.order.get(i).getOrderNumber();
 					data[2]=OrderManager.order.get(i).totalPrice;
 					data[3] = OrderManager.order.get(i).getApproval();
-					tableModel2.addRow(data);
+					tableModel2.insertRow(0,data);
 					}
 			}
 		}
@@ -609,10 +773,12 @@ class searchMenu extends JFrame{
 			"메뉴",
 			"날짜",
 			"요일",
-			"몇 원 이상"
+			"월"
 	};
 	confirmListener con = new confirmListener();
 	menuconfirmListener men = new menuconfirmListener();
+	dayconfirmListener daycon = new dayconfirmListener();
+	MonthconfirmListener mcon = new MonthconfirmListener();
 	searchMenu(){
 		content = getContentPane();
 		createPanel();
@@ -628,6 +794,15 @@ class searchMenu extends JFrame{
 		confirm = new JButton("확인");
 		confirm.addActionListener(con);
 		cancel = new JButton("취소");
+		cancel.addActionListener(new ActionListener(){
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				setVisible(false);
+			}
+			
+		});
 		pane.add(search);
 		pane.add(list);
 		pane.add(confirm);
@@ -638,14 +813,14 @@ class searchMenu extends JFrame{
 			String select = (String)list.getSelectedItem();
 			if(select.equals("메뉴")){
 				selectMenu();
-				setVisible(false);
 			} else if(select.equals("날짜")){
 				selectDate sd = new selectDate();
+				sd.setVisible(true);
 				setVisible(false);
 			} else if(select.equals("요일")){
-				
-			} else if(select.equals("몇 원 이상")){
-				
+				selectDay();
+			} else if(select.equals("월")){
+				selectMonth();
 			}
 		}
 	}
@@ -655,17 +830,67 @@ class searchMenu extends JFrame{
 			if(menu!=null){
 				searchMenuOrder sm = new searchMenuOrder(menu);
 				sm.setVisible(true);
+				setVisible(false);
 			}
 		}
 	}
-	public class dateconfirmListener implements ActionListener{
+	public class dayconfirmListener implements ActionListener{
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			// TODO Auto-generated method stub
-			
+			String day = (String)list.getSelectedItem();
+			if(day!=null){
+				searchDayOrder sd = new searchDayOrder(day);
+				sd.setVisible(true);
+				setVisible(false);
+			}
 		}
 		
+	}
+	public class MonthconfirmListener implements ActionListener{
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			// TODO Auto-generated method stub
+			String month = (String)list.getSelectedItem();
+			if(month!=null){
+				searchMonthOrder sm = new searchMonthOrder(month);
+				sm.setVisible(true);
+				setVisible(false);
+			}
+		}
+		
+	}
+	void selectDay(){
+		String day[]= {
+				"월요일",
+				"화요일",
+				"수요일",
+				"목요일",
+				"금요일",
+				"토요일",
+				"일요일"
+		};
+		list.removeAllItems();
+		for(int i =0;i<day.length;i++){
+			list.addItem(day[i]);
+		}
+		search.setText("요일");
+		pane.updateUI();
+		confirm.removeActionListener(con);
+		confirm.addActionListener(daycon);
+	}
+	void selectMonth(){
+		String Month[] ={"01","02","03","04","05","06","07","08","09","10","11","12"};
+		list.removeAllItems();
+		for(int i=0;i<Month.length;i++){
+			list.addItem(Month[i]);
+		}
+		search.setText("월");
+		pane.updateUI();
+		confirm.removeActionListener(con);
+		confirm.addActionListener(mcon);
 	}
 	void selectMenu(){
 		String menuName[] = new String[MenuManager.menu.size()];
@@ -678,214 +903,5 @@ class searchMenu extends JFrame{
 		pane.updateUI();
 		confirm.removeActionListener(con);
 		confirm.addActionListener(men);
-	}
-}
-class selectDate extends JFrame{
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-	SimpleDateFormat f = new SimpleDateFormat("yyyyMMdd");
-	Container content;
-	JPanel pane;
-	JLabel Month;
-	JLabel date;
-	JComboBox<String> Monthbox;
-	JComboBox<String> datebox;
-	JButton confirm;
-	JButton cancel;
-	DefaultComboBoxModel<String> listModel;
-	String MonthList[]={
-			"01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"
-	};
-	String dateList[][] = new String[12][];
-	void createDateList(){
-		for(int i=0;i<MonthList.length;i++){
-			if(MonthList[i].equals("01")||MonthList[i].equals("03")||MonthList[i].equals("05")||
-					MonthList[i].equals("07")||MonthList[i].equals("08")||MonthList[i].equals("10")||MonthList[i].equals("12")){
-				dateList[i]= new String[31];
-				for(int j=0;j<31;j++){
-					dateList[i][j]=String.valueOf(j+1);
-				}
-			} else if(MonthList[i].equals("04")||MonthList[i].equals("06")||MonthList[i].equals("09")||
-					MonthList[i].equals("11")){
-				dateList[i] = new String[30];
-				for(int j=0;j<30;j++){
-					dateList[i][j]=String.valueOf(j+1);
-				}
-			} else{
-				dateList[i] = new String[28];
-				for(int j=0 ;j<28;j++){
-					dateList[i][j]=String.valueOf(j+1);
-				}
-			}
-		}
-	}
-	selectDate(){
-		createPane();
-		content = getContentPane();
-		setBounds(500,500,200,200);
-		content.add(pane);
-		setVisible(true);
-	}
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public void createPane(){
-		createDateList();
-		listModel = new DefaultComboBoxModel(dateList[0]);
-		Month = new JLabel("월");
-		date = new JLabel("일");
-		Monthbox = new JComboBox<String>(MonthList);
-		confirm = new JButton("확인");
-		confirm.addActionListener(new ActionListener(){
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
-				searchDateOrder sd = new searchDateOrder((String)Monthbox.getSelectedItem(),(String)listModel.getSelectedItem());
-				sd.setVisible(true);
-			}
-			
-		});
-		cancel = new JButton("취소");
-		cancel.addActionListener(new ActionListener(){
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
-				setVisible(false);
-			}
-			
-		});
-		pane = new JPanel();
-		pane.setLayout(new GridLayout(3,3));
-		pane.setPreferredSize(new Dimension(240,240));
-		for(int i=0;i<31;i++){
-			listModel.addElement(dateList[0][i]);
-		}
-		datebox = new JComboBox<String>(listModel);
-		datebox.setMaximumRowCount(listModel.getSize());
-		Monthbox.addItemListener(new ItemListener(){
-			@Override
-			public void itemStateChanged(ItemEvent e) {
-				// TODO Auto-generated method stub
-				for(int i=0 ; i<MonthList.length;i++){
-					if(MonthList[i].equals(Monthbox.getSelectedItem())){
-						listModel.removeAllElements();
-						for(int j = 0;j<dateList[i].length;j++){
-							listModel.addElement(dateList[i][j]);
-						}
-						datebox.setMaximumRowCount(listModel.getSize());
-					}
-				}
-			}
-		});
-		pane.add(Month);
-		pane.add(Monthbox);
-		pane.add(date);
-		pane.add(datebox);
-		pane.add(confirm);
-		pane.add(cancel);
-	}
-}
-class searchDateOrder extends JFrame{
-
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-	Container content;
-	JPanel leftPane;
-	JPanel rightPane;
-	JTable table;
-	DefaultTableModel tableModel;
-	JTextArea listDetail;
-	JScrollPane scroll;
-	String []info2 = {"날짜","주문번호","금액","결재"};
-	String month,date;
-	searchDateOrder(String month,String date){
-		this.month = month;
-		this.date = date;
-		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		setBounds(300,300,1200,800);
-		content = getContentPane();
-		createPane();
-		DefaultTableCellRenderer dtcr = new DefaultTableCellRenderer();
-		dtcr.setHorizontalAlignment(SwingConstants.CENTER);
-		TableColumnModel tcm = table.getColumnModel();
-		for(int i=0;i<tcm.getColumnCount();i++){
-			tcm.getColumn(i).setCellRenderer(dtcr);
-		}
-
-		content.add(scroll, BorderLayout.CENTER);
-		content.add(listDetail,BorderLayout.EAST);
-	}
-	public void createPane(){
-		tableModel = new DefaultTableModel(info2,0);
-		table = new JTable(tableModel);
-		table.setColumnSelectionAllowed(false);
-		table.setRowSelectionAllowed(true);
-		table.setAutoscrolls(true);
-		scroll = new JScrollPane(table);
-		table.setPreferredSize(new Dimension(500,800));
-		listDetail = new JTextArea("");
-		listDetail.setPreferredSize(new Dimension(500,800));
-		listDetail.setFont(new Font("\\OrderManager\\lib\\08SEOULNAMSANM.TTF",Font.CENTER_BASELINE,20));
-		listDetail.setEnabled(false);
-		table.setFont(new Font("\\OrderManager\\lib\\08SEOULNAMSANM.TTF",Font.CENTER_BASELINE,18));
-		table.setRowHeight(30);
-		rightPane = new JPanel();
-		leftPane = new JPanel();
-		listOrder();
-		leftPane.setPreferredSize(new Dimension(500,800));
-		rightPane.setPreferredSize(new Dimension(500,800));
-		ListSelectionModel listMod = table.getSelectionModel();
-		listMod.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		listMod.addListSelectionListener(new selectTableListener());
-	}
-	public void removetable(DefaultTableModel table){
-		while(table.getRowCount()!=0){
-			table.removeRow(0);
-		}
-	}
-	public void listOrder(){
-		Object [] data = new Object[4];
-		removetable(tableModel);
-		for(int i=0 ;i<OrderManager.order.size();i++){
-			System.out.println(OrderManager.order.get(i).getOrderDate().substring(6, 8));
-			System.out.println(OrderManager.order.get(i).getOrderDate().substring(10, 12));
-			if(OrderManager.order.get(i).getOrderDate().substring(6,8).equals(month) && OrderManager.order.get(i).getOrderDate().substring(10, 12).equals(date)){
-				for(sellMenu j : OrderManager.order.get(i).getOrderList()){
-					data[0]=OrderManager.order.get(i).getOrderDate();
-					data[1]=OrderManager.order.get(i).getOrderNumber();
-				data[2]=OrderManager.order.get(i).totalPrice;
-				data[3] = OrderManager.order.get(i).getApproval();
-				tableModel.addRow(data);
-				}
-			}
-		}
-	}
-	public class selectTableListener implements ListSelectionListener{
-
-		@Override
-		public void valueChanged(ListSelectionEvent e) {
-			// TODO Auto-generated method stub
-			int selRows;
-			Object Value;
-			if(!e.getValueIsAdjusting()){
-				selRows = table.getSelectedRow();
-				listDetail.setText("");
-				listDetail.setEnabled(false);
-				if(selRows>=0){
-					TableModel tm = table.getModel();
-					Value = tm.getValueAt(selRows, 1);
-					int index = OrderManager.indexOfOrder((int) Value);
-					listDetail.append(OrderManager.order.get(index).getOrderDate()+"\n");
-					listDetail.append("메뉴명\t수량\t금액\n");
-					for(sellMenu i : OrderManager.order.get(index).order){
-						listDetail.append(i.getName()+"\t"+i.getCount()+"\t"+i.getPrice()*i.getCount()+"\n");
-					}
-				}
-			}
-		}	
 	}
 }

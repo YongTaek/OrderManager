@@ -39,6 +39,10 @@ class Order implements Serializable{
 		this.order = order;
 		this.date = date;
 		this.approval = approval;
+		totalPrice();
+	}
+	void totalPrice(){
+		totalPrice = 0;
 		for(sellMenu i : order){
 			this.totalPrice+=i.getPrice() * i.getCount();
 		}
@@ -62,13 +66,15 @@ class Order implements Serializable{
 		this.approval = approval;
 	}
 	void setOrderList(ArrayList<sellMenu> sellMenu){
-		order.clear();
 		this.order = sellMenu;
+
+	}
+	void settotalPrice(){
+		totalPrice();
 	}
 }
 public class OrderManager {
 	static ArrayList<Order> order = new ArrayList<Order>();
-	static int orderCount =0;
 	ReadWrite fio = new ReadWrite();
 	static int indexOfOrder(int n){
 		int index=order.size()+1;
