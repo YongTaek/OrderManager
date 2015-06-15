@@ -212,7 +212,7 @@ public class OrderGui extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
-				searchMenu sm = new searchMenu();
+				searchOrder sm = new searchOrder();
 				sm.setVisible(true);
 			}
 			
@@ -386,82 +386,6 @@ public class OrderGui extends JFrame {
 					OrderManager.order.add(i);
 					addRow(i);
 				}
-				OrderManager.order.get(37).date = "2015년 08월 02일 일요일 오전 11시 45분 43초";
-				OrderManager.order.get(37).approval = "완료";
-				OrderManager.order.get(38).date = "2015년 08월 03일 월요일 오전 10시 21분 22초";
-				OrderManager.order.get(38).approval = "완료";
-				OrderManager.order.get(39).date = "2015년 08월 04일 화요일 오전 9시 48분 42초";
-				OrderManager.order.get(39).approval = "완료";
-				OrderManager.order.get(40).date = "2015년 08월 05일 수요일 오후 12시 23분 22초";
-				OrderManager.order.get(40).approval = "완료";
-				OrderManager.order.get(41).date = "2015년 08월 06일 목요일 오후 4시 23분 22초";
-				OrderManager.order.get(41).approval = "완료";
-				OrderManager.order.get(42).date = "2015년 08월 07일 금요일 오후 1시 33분 22초";
-				OrderManager.order.get(42).approval = "완료";
-				OrderManager.order.get(43).date = "2015년 08월 08일 토요일 오후 12시 23분 22초";
-				OrderManager.order.get(43).approval = "완료";
-				OrderManager.order.get(44).date = "2015년 08월 09일 일요일 오후 2시 43분 24초";
-				OrderManager.order.get(44).approval = "완료";
-				OrderManager.order.get(45).date = "2015년 09월 15일 화요일 오후 6시 43분 24초";
-				OrderManager.order.get(45).approval = "완료";
-				OrderManager.order.get(46).date = "2015년 09월 16일 수요일 오전 10시 29분 42초";
-				OrderManager.order.get(46).approval = "완료";
-				OrderManager.order.get(47).date = "2015년 09월 17일 목요일 오후 1시 23분 32초";
-				OrderManager.order.get(47).approval = "완료";
-				OrderManager.order.get(48).date = "2015년 09월 18일 금요일 오전 11시 32분 45초";
-				OrderManager.order.get(48).approval = "완료";
-				OrderManager.order.get(49).date = "2015년 09월 19일 토요일 오전 9시 23분 32초";
-				OrderManager.order.get(49).approval = "완료";
-				OrderManager.order.get(50).date = "2015년 09월 20일 일요일 오후 2시 23분 23초";
-				OrderManager.order.get(50).approval = "완료";
-				OrderManager.order.get(51).date = "2015년 09월 21일 월요일 오전 10시 32분 29초";
-				OrderManager.order.get(51).approval = "완료";
-				OrderManager.order.get(52).date = "2015년 09월 22일 화요일 오후 12시 32분 33초";
-				OrderManager.order.get(52).approval = "완료";
-				OrderManager.order.get(53).date = "2015년 10월 04일 일요일 오전 10시 23분 32초";
-				OrderManager.order.get(53).approval = "완료";
-				OrderManager.order.get(54).date = "2015년 10월 05일 월요일 오후 6시 49분 31초";
-				OrderManager.order.get(54).approval = "완료";
-				OrderManager.order.get(55).date = "2015년 10월 06일 화요일 오후 1시 23분 53초";
-				OrderManager.order.get(55).approval = "완료";
-				OrderManager.order.get(56).date = "2015년 10월 07일 수요일 오후 4시 24분 22초";
-				OrderManager.order.get(56).approval = "완료";
-				OrderManager.order.get(57).date = "2015년 10월 08일 목요일 오후 4시 24분 22초";
-				OrderManager.order.get(57).approval = "완료";
-				OrderManager.order.get(58).date = "2015년 10월 09일 금요일 오후 4시 24분 22초";
-				OrderManager.order.get(58).approval = "완료";
-				OrderManager.order.get(59).date = "2015년 10월 10일 토요일 오후 4시 24분 22초";
-				OrderManager.order.get(59).approval = "완료";
-				OrderManager.order.get(60).date = "2015년 10월 11일 일요일 오후 4시 24분 22초";
-				OrderManager.order.get(60).approval = "완료";
-				OrderManager.order.get(61).date = "2015년 11월 16일 월요일 오후 4시 24분 22초";
-				OrderManager.order.get(61).approval = "완료";
-				OrderManager.order.get(62).date = "2015년 11월 17일 화요일 오후 4시 24분 22초";
-				OrderManager.order.get(62).approval = "완료";
-				OrderManager.order.get(63).date = "2015년 11월 18일 수요일 오후 4시 24분 22초";
-				OrderManager.order.get(63).approval = "완료";
-				OrderManager.order.get(64).date = "2015년 11월 19일 수요일 오후 4시 24분 22초";
-				OrderManager.order.get(64).approval = "완료";
-				OrderManager.order.get(65).date = "2015년 11월 20일 목요일 오후 4시 24분 22초";
-				OrderManager.order.get(65).approval = "완료";
-				OrderManager.order.get(66).date = "2015년 11월 21일 금요일 오후 2시 21분 26초";
-				OrderManager.order.get(66).approval = "완료";
-				OrderManager.order.get(67).date = "2015년 11월 22일 토요일 오후 2시 21분 26초";
-				OrderManager.order.get(68).approval = "완료";
-				OrderManager.order.get(69).date = "2015년 11월 23일 일요일 오후 2시 21분 26초";
-				OrderManager.order.get(69).approval = "완료";
-				OrderManager.order.get(70).date = "2015년 12월 05일 토요일 오후 2시 21분 26초";
-				OrderManager.order.get(70).approval = "완료";
-				OrderManager.order.get(71).date = "2015년 12월 06일 일요일 오후 2시 21분 26초";
-				OrderManager.order.get(71).approval = "완료";
-				OrderManager.order.get(72).date = "2015년 12월 07일 월요일 오후 2시 21분 26초";
-				OrderManager.order.get(72).approval = "완료";
-				OrderManager.order.get(73).date = "2015년 12월 08일 화요일 오후 2시 21분 26초";
-				OrderManager.order.get(73).approval = "완료";
-				OrderManager.order.get(74).date = "2015년 12월 09일 수요일 오후 2시 21분 26초";
-				OrderManager.order.get(74).approval = "완료";
-				OrderManager.order.get(75).date = "2015년 12월 10일 목요일 오후 2시 21분 26초";
-				OrderManager.order.get(75).approval = "완료";
 			}
 		}catch(Exception ex){}
 	}
@@ -756,7 +680,7 @@ public class OrderGui extends JFrame {
 		
 	}
 }
-class searchMenu extends JFrame{
+class searchOrder extends JFrame{
 
 	/**
 	 * 
@@ -779,7 +703,7 @@ class searchMenu extends JFrame{
 	menuconfirmListener men = new menuconfirmListener();
 	dayconfirmListener daycon = new dayconfirmListener();
 	MonthconfirmListener mcon = new MonthconfirmListener();
-	searchMenu(){
+	searchOrder(){
 		content = getContentPane();
 		createPanel();
 		content.add(pane,BorderLayout.CENTER);
